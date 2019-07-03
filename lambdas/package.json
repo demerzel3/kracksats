@@ -1,0 +1,20 @@
+{
+  "name": "@kracksats/lambda-buyer",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:demerzel3/kracksats.git",
+  "author": "Gabriele Genta <gabriele.genta@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.484.0",
+    "kraken-api": "^1.0.0",
+    "ramda": "^0.26.1"
+  },
+  "eslintConfig": {
+    "parserOptions": { "ecmaVersion": 2018 },
+    "env": {
+      "node": true,
+      "es6": true
+    }
+  }
+}
