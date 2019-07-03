@@ -24,6 +24,10 @@ const checkOrderStatus = (credentials, orderId) => {
                 console.log('Order still pending', orderId, order);
                 throw new OrderPendingError(orderId);
             }
+        }))
+        .then(order => ({
+            txid: orderId,
+            ...order,
         }));
 };
 
