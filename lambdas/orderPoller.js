@@ -1,6 +1,7 @@
 const {
     SecretsManager,
     SQS,
+    SNS,
 } = require('aws-sdk')
 
 const handleError = require('./src/lib/handleError');
@@ -8,6 +9,12 @@ const {
     OrderPendingError,
     checkOrderStatus,
 } = require('./src/orderPoller');
+
+const {
+    KRAKEN_CREDENTIALS_ARN,
+    QUEUE_URL,
+    EVENT_BUS_ARN,
+} = process.env;
 
 const unwrapQueueEvent = (event) => {
     const {
@@ -30,14 +37,23 @@ const unwrapQueueEvent = (event) => {
         : parsedBody;
 };
 
-exports.handler = (event, context) => {
-    const {
-        KRAKEN_CREDENTIALS_ARN,
-        QUEUE_URL,
-    } = process.env;
+const publishOrderCompletedEvent = (sns, order) => sns.publish({
+    TopicArn: EVENT_BUS_ARN,
+    Message: JSON.stringify({
+        order,
+    }),
+    MessageAttributes: {
+        type: {
+            DataType: 'String',
+            StringValue: 'orderCompleted',
+        },
+    },
+}).promise();
 
+exports.handler = (event, context) => {
     const secretsManager = new SecretsManager();
     const sqs = new SQS();
+    const sns = new SNS();
 
     return secretsManager.getSecretValue({ SecretId: KRAKEN_CREDENTIALS_ARN }).promise()
         .then(result => JSON.parse(result.SecretString))
@@ -53,8 +69,9 @@ exports.handler = (event, context) => {
             return checkOrderStatus(credentials, orderId)
                 .then(order => {
                     console.log(order);
-                    // TODO: broadcast "orderCompleted" event.
-                    return order;
+
+                    return publishOrderCompletedEvent(sns, order)
+                        .then(() => order);
                 })
                 .catch(handleError(OrderPendingError, e =>
                     sqs.sendMessage({
