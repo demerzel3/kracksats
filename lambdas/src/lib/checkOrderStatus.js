@@ -4,11 +4,7 @@ const {
     tap,
 } = require('ramda');
 
-class OrderPendingError extends Error {
-    constructor(orderId) {
-        super(`The order ${orderId} is still pending`);
-    }
-}
+const { OrderPendingError } = require('./errors');
 
 const fetchOrder = (client, orderId) => client
     .api('QueryOrders', { txid: orderId })
@@ -31,7 +27,4 @@ const checkOrderStatus = (credentials, orderId) => {
         }));
 };
 
-module.exports = {
-    OrderPendingError,
-    checkOrderStatus,
-};
+module.exports = checkOrderStatus;

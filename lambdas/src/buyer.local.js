@@ -1,4 +1,4 @@
-const { buy } = require('./src/buyer');
+const buy = require('./lib/buy');
 
 const {
     API_KEY,

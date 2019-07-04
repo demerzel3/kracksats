@@ -1,4 +1,4 @@
-const { checkOrderStatus } = require('./src/orderPoller');
+const checkOrderStatus = require('./lib/checkOrderStatus');
 
 const {
     env: {

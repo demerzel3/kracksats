@@ -1,7 +1,8 @@
 const {
     SecretsManager,
-} = require('aws-sdk')
-const { buy } = require('./src/buyer');
+} = require('aws-sdk');
+
+const buy = require('./lib/buy');
 
 exports.handler = (event, context) => {
     const {

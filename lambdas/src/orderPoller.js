@@ -4,11 +4,9 @@ const {
     SNS,
 } = require('aws-sdk')
 
-const handleError = require('./src/lib/handleError');
-const {
-    OrderPendingError,
-    checkOrderStatus,
-} = require('./src/orderPoller');
+const handleError = require('./lib/handleError');
+const { OrderPendingError } = require('./lib/errors');
+const checkOrderStatus = require('./lib/checkOrderStatus');
 
 const {
     KRAKEN_CREDENTIALS_ARN,

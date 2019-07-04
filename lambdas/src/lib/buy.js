@@ -4,20 +4,14 @@ const {
     pathOr,
 } = require('ramda');
 
-const floor = require('../lib/floor');
-const numberToString = require('../lib/numberToString');
+const floor = require('./floor');
+const { BelowMinimumAmountError } = require('./errors');
 
 const FIAT_SYMBOL = 'ZEUR';
 const CRYPTO_SYMBOL = 'XXBT';
 const MIN_ORDER_AMOUNT = 0.002;
 const ORDER_PRECISION = 8;
 const ORDER_FEES = 0.0016;
-
-class BelowMinimumAmountError extends Error {
-    constructor(amount) {
-        super(`${numberToString(amount)} is below minimum order`);
-    }
-}
 
 const fetchFiatBalance = (client) => client.api('Balance')
     .then(pathOr(0, ['result', FIAT_SYMBOL]))
@@ -66,6 +60,4 @@ const buy = (credentials) => {
         });
 };
 
-module.exports = {
-    buy,
-};
+module.exports = buy;
