@@ -2,10 +2,12 @@ const KrakenClient = require('kraken-api');
 const {
     path,
     pathOr,
+    applySpec,
+    propOr,
 } = require('ramda');
 
 const floor = require('./floor');
-const { BelowMinimumAmountError } = require('./errors');
+const { AboveMaximumPriceError, BelowMinimumAmountError } = require('./errors');
 
 const FIAT_SYMBOL = 'ZEUR';
 const CRYPTO_SYMBOL = 'XXBT';
@@ -38,7 +40,12 @@ const placeOrder = (client, price, orderAmount) => {
 const computeOrderAmount = (initialBalance, bidPrice) =>
     floor(ORDER_PRECISION, (initialBalance * (1 - ORDER_FEES)) / bidPrice);
 
-const buy = (credentials) => {
+const buy = (credentials, options) => {
+    const {
+        maximumPrice,
+    } = applySpec({
+        maximumPrice: propOr(Infinity, 'maximumPrice'),
+    })(options);
     const client = new KrakenClient(credentials.API_KEY, credentials.API_SECRET);
 
     return Promise.all([fetchFiatBalance(client), fetchCryptoBidPrice(client)])
@@ -52,7 +59,9 @@ const buy = (credentials) => {
                 orderAmount,
             }));
 
-            if (orderAmount < MIN_ORDER_AMOUNT) {
+            if (cryptoBidPrice > maximumPrice) {
+                throw new AboveMaximumPriceError(maximumPrice, cryptoBidPrice);
+            } else if (orderAmount < MIN_ORDER_AMOUNT) {
                 throw new BelowMinimumAmountError(orderAmount);
             } else {
                 return placeOrder(client, cryptoBidPrice, orderAmount);
