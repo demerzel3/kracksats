@@ -62,11 +62,11 @@ exports.handler = (event, context) => {
                     txid: orderId,
                 },
             } = unwrappedEvent;
-            console.log(unwrappedEvent);
+            console.log(JSON.stringify(unwrappedEvent, null, 2));
 
             return checkOrderStatus(credentials, orderId)
                 .then(order => {
-                    console.log(order);
+                    console.log(JSON.stringify(order, null, 2));
 
                     return publishOrderCompletedEvent(sns, order)
                         .then(() => order);
