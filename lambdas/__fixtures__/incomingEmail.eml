@@ -1,0 +1,88 @@
+Return-Path: <foo.bar@gmail.com>
+Received: from mail-lj1-f172.google.com (mail-lj1-f172.google.com [209.85.208.172])
+ by inbound-smtp.eu-west-1.amazonaws.com with SMTP id vs7gtk1ro9u976ib5ndhebv79qnvhd2u2q5hm981
+ for kracksats@demerzel3.dev;
+ Fri, 05 Jul 2019 17:14:31 +0000 (UTC)
+Received-SPF: pass (spfCheck: domain of _spf.google.com designates 209.85.208.172 as permitted sender) client-ip=209.85.208.172; envelope-from=foo.bar@gmail.com; helo=mail-lj1-f172.google.com;
+Authentication-Results: amazonses.com;
+ spf=pass (spfCheck: domain of _spf.google.com designates 209.85.208.172 as permitted sender) client-ip=209.85.208.172; envelope-from=foo.bar@gmail.com; helo=mail-lj1-f172.google.com;
+ dkim=pass header.i=@gmail.com;
+ dmarc=pass header.from=gmail.com;
+X-SES-RECEIPT: AEFBQUFBQUFBQUFFMGZnK21rcnZjMzJlbnQxRk1CWWJvSUlIZEwxOUtFYVZ1UEQzS3d1WnJNOEtTNHNqblowamdMY2NDVjdaZGZWNUkvSmw2WlhpenFCTEpqdm1QMS9hbUptSXlIMW1wVVNmaTlWTm4vVVNpM2o5VUFvUUNVRU9ESmhXd3d5RXhnbUVjSW9WOXo5MGIvVlVaOUpwbThmUjV4YWRaL1FQZEdOSXVsdU9qVjRjMDkzb0w0NlVkSE5nOGQ4SEk1NjVSYmZYN0p4dEpmTGJweWdDODZpMkVHamdQTGZ4Z3B1UHAyMzRVQ3R5aDRaZFhIbWZjUUJtUXUzRXpOb0JMdHFzUG5abUxmaGtnNzBQRFljWHRtc0VFWU9tc0dSKzdvK3VuOHZWa1Jxek5NSWRKV2QrbXU0VitrZTViZWxRU3FleXR5T2s9
+X-SES-DKIM-SIGNATURE: a=rsa-sha256; q=dns/txt; b=KDe0I4lp/IiKXWS9JY9Iv4iDOfSRsjJzFAH1/BZf9qiNYg3K8LOik3NU8bYWGFNNu4FtaD7GmHm4RhDbOrBy2r7d7O3VAH/5OV2rbVaTISQAwZIb8Pj7QxMmOw3yQI073avCBbqI6XHBFwQxmuaCqiBKOlIV6nAid7Mxuwujtzo=; c=relaxed/simple; s=ihchhvubuqgjsxyuhssfvqohv7z3u4hn; d=amazonses.com; t=1562346871; v=1; bh=4sHbIl+w5rmu6BS58P98XJICZhmmMgWU6Q2u/INmx4Y=; h=From:To:Cc:Bcc:Subject:Date:Message-ID:MIME-Version:Content-Type:X-SES-RECEIPT;
+Received: by mail-lj1-f172.google.com with SMTP id 16so9884164ljv.10
+        for <kracksats@demerzel3.dev>; Fri, 05 Jul 2019 10:14:30 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
+        bh=4sHbIl+w5rmu6BS58P98XJICZhmmMgWU6Q2u/INmx4Y=;
+        b=F6ivAaBOIKXAGwALofjn8Jo/tIfGiGvfrevnCY98v1dcLs4vk8E4Soi8s/d0OT4s7v
+         dMgKSDQ7y7DsZtPP88tSyKHri3a1S3jJP9bhM6XHF69Gey3szWJTnkmskTqmGZHdmMuh
+         GnR7/SG5iR7zGNYUZ3O+ZjR0dyGTp0wN0DJ4nNpYmXDQgtgQjS+frukAK0Nv0Y5O97s4
+         DZcMcNcHB5Ej1cBndVMYWP9oCG+O8b0w7kI81ud1vauTO5Vab9Ryd/u7xXA+iWh4fLMa
+         ElRJwwn7X29L8BxNfItyXjKRaVIEVCWb9OJbrvuYPX6HhYS9EmHsgzha1YdsXyicfCRc
+         wGTQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to;
+        bh=4sHbIl+w5rmu6BS58P98XJICZhmmMgWU6Q2u/INmx4Y=;
+        b=lMi8jUA45Txe71vAwTDasQ/wYWN/yKTiTWgaOpj/e6g3ManGR9vBNeWmjTNzWcTDmn
+         39lcYqW1AO/0WqA9tkr5GO56WZFjsrta8CooZcf0tnxFi4iKB3mvvZ/oB4JgJnkN9msQ
+         2caztsayCaSKwV/zVXevxq9FcRWvOCRF9xDXeFm7+6iI24P2K4VF2X4oXCUXClVv+Ty+
+         Ez4cJir2mrt3+hg2w9L/YmvICc9cEqNJWI3m8vuT+HCJ24g9d+K6YYwf1vjmNzedWxe/
+         73hUexPqafEpKZbGzwxCH0H7tQ0Ot90hd02x1QHx5AbwNIB4xmJqOp8eW9bmHEqGpKdd
+         sYlA==
+X-Gm-Message-State: APjAAAVuKDfQl6mjiCRYsmpkb3ODC6JDvHSKpEvbrm95R6WkTDgcu6RF
+	+ijyatnN4oqIS9d7kkxaf7iA9dhdB2u4Wo74Vk5EWg==
+X-Google-Smtp-Source: APXvYqxHVG9CJflzRy+b6Df6RSNwz1Qcv0x1lAFeklA1YlJ5UJcni07ybAxzuOPG3Pu8W8pP2BplpJUAklP6H3wO8a4=
+X-Received: by 2002:a2e:9a58:: with SMTP id k24mr2770286ljj.165.1562346870136;
+ Fri, 05 Jul 2019 10:14:30 -0700 (PDT)
+MIME-Version: 1.0
+References: <CAA4-GA6BNmXQtXKBR=GZ6xt1VH=tmHKCP6_QQmBPxNdEB_txNg@mail.gmail.com>
+ <CAA4-GA5UCn_NgncgLko10mj5WLmo3A1_wQ22LrubKDipAf0Z-A@mail.gmail.com>
+In-Reply-To: <CAA4-GA5UCn_NgncgLko10mj5WLmo3A1_wQ22LrubKDipAf0Z-A@mail.gmail.com>
+From: Foo Bar <foo.bar@gmail.com>
+Date: Fri, 5 Jul 2019 19:14:19 +0200
+Message-ID: <CAA4-GA5ErJYyDJytydN9fpOYBa1fK_wKWT1mv0e0ajtVJE4nLw@mail.gmail.com>
+Subject: Re: Order completed
+To: kracksats@demerzel3.dev
+Content-Type: multipart/alternative; boundary="00000000000035e2cc058cf23aea"
+
+--00000000000035e2cc058cf23aea
+Content-Type: text/plain; charset="UTF-8"
+
+this should be delivered
+
+Il giorno ven 5 lug 2019 alle ore 19:02 Foo Bar <
+foo.bar@gmail.com> ha scritto:
+
+> still waiting for a response here...
+>
+> Il giorno ven 5 lug 2019 alle ore 18:58 Foo Bar <
+> foo.bar@gmail.com> ha scritto:
+>
+>> hei! how are you doing pal?
+>>
+>
+
+--00000000000035e2cc058cf23aea
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">this should be delivered</div><br><div class=3D"gmail_quot=
+e"><div dir=3D"ltr" class=3D"gmail_attr">Il giorno ven 5 lug 2019 alle ore =
+19:02 Foo Bar &lt;<a href=3D"mailto:foo.bar@gmail.com">gabrie=
+le.genta@gmail.com</a>&gt; ha scritto:<br></div><blockquote class=3D"gmail_=
+quote" style=3D"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,=
+204);padding-left:1ex"><div dir=3D"ltr">still waiting for a response here..=
+.</div><br><div class=3D"gmail_quote"><div dir=3D"ltr" class=3D"gmail_attr"=
+>Il giorno ven 5 lug 2019 alle ore 18:58 Foo Bar &lt;<a href=3D"mail=
+to:foo.bar@gmail.com" target=3D"_blank">foo.bar@gmail.com</a>=
+&gt; ha scritto:<br></div><blockquote class=3D"gmail_quote" style=3D"margin=
+:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex"=
+><div dir=3D"ltr">hei! how are you doing pal?</div>
+</blockquote></div>
+</blockquote></div>
+
+--00000000000035e2cc058cf23aea--
