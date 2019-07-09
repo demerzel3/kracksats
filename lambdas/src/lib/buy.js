@@ -4,6 +4,7 @@ const {
     pathOr,
     applySpec,
     propOr,
+    min,
 } = require('ramda');
 
 const floor = require('./floor');
@@ -43,14 +44,16 @@ const computeOrderAmount = (initialBalance, bidPrice) =>
 const buy = (credentials, options) => {
     const {
         maximumPrice,
+        maximumAmount,
     } = applySpec({
         maximumPrice: propOr(Infinity, 'maximumPrice'),
+        maximumAmount: propOr(Infinity, 'maximumAmount'),
     })(options);
     const client = new KrakenClient(credentials.API_KEY, credentials.API_SECRET);
 
     return Promise.all([fetchFiatBalance(client), fetchCryptoBidPrice(client)])
         .then(([fiatBalance, cryptoBidPrice]) => {
-            const orderAmount = computeOrderAmount(fiatBalance, cryptoBidPrice);
+            const orderAmount = computeOrderAmount(min(fiatBalance, maximumAmount), cryptoBidPrice);
 
             console.log(JSON.stringify({
                 fiatBalance,
