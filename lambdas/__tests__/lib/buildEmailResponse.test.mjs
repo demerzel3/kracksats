@@ -1,7 +1,10 @@
-const fs = require('fs');
-const simpleParser = require('mailparser').simpleParser;
-const buildEmailResponse = require('../../src/lib/buildEmailResponse');
+import fs from 'fs';
+import mailparser from 'mailparser';
 
+import __dirname from './__dirname.js';
+import buildEmailResponse from '../../src/lib/buildEmailResponse';
+
+const { simpleParser } = mailparser;
 const rawEmail = fs.readFileSync(`${__dirname}/../../__fixtures__/incomingEmail.eml`).toString();
 
 simpleParser(rawEmail)

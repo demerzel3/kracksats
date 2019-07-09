@@ -1,4 +1,4 @@
-const checkOrderStatus = require('./lib/checkOrderStatus');
+import checkOrderStatus from './lib/checkOrderStatus';
 
 const {
     env: {
