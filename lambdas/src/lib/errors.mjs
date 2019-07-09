@@ -1,4 +1,4 @@
-const numberToString = require('./numberToString');
+import numberToString from './numberToString';
 
 class AboveMaximumPriceError extends Error {
     constructor(maximumPrice, currentPrice) {
@@ -18,7 +18,7 @@ class OrderPendingError extends Error {
     }
 }
 
-module.exports = {
+export {
     AboveMaximumPriceError,
     BelowMinimumAmountError,
     OrderPendingError,

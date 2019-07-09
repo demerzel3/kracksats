@@ -1,11 +1,8 @@
-const {
-    SecretsManager,
-    SNS,
-} = require('aws-sdk');
+import aws from 'aws-sdk';
 
-const buy = require('./lib/buy');
-const handleError = require('./lib/handleError');
-const { AboveMaximumPriceError, BelowMinimumAmountError } = require('./lib/errors');
+import buy from './lib/buy';
+import handleError from './lib/handleError';
+import { AboveMaximumPriceError, BelowMinimumAmountError } from './lib/errors';
 
 const {
     EVENT_BUS_ARN,
@@ -24,15 +21,15 @@ const publishOrderPlacedEvent = (sns, order) => sns.publish({
     },
 }).promise();
 
-exports.handler = (event, context) => {
+export const handler = (event, context) => {
     const {
         KRAKEN_CREDENTIALS_ARN,
         MAXIMUM_PRICE,
         MAXIMUM_AMOUNT,
     } = process.env;
 
-    const secretsManager = new SecretsManager();
-    const sns = new SNS();
+    const secretsManager = new aws.SecretsManager();
+    const sns = new aws.SNS();
 
     return secretsManager.getSecretValue({ SecretId: KRAKEN_CREDENTIALS_ARN }).promise()
         .then(result => JSON.parse(result.SecretString))

@@ -1,10 +1,10 @@
-const KrakenClient = require('kraken-api');
-const {
+import KrakenClient from 'kraken-api';
+import {
     path,
     tap,
-} = require('ramda');
+} from 'ramda';
 
-const { OrderPendingError } = require('./errors');
+import { OrderPendingError } from './errors';
 
 const fetchOrder = (client, orderId) => client
     .api('QueryOrders', { txid: orderId })
@@ -27,4 +27,4 @@ const checkOrderStatus = (credentials, orderId) => {
         }));
 };
 
-module.exports = checkOrderStatus;
+export default checkOrderStatus;

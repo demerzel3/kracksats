@@ -1,14 +1,14 @@
-const KrakenClient = require('kraken-api');
-const {
+import KrakenClient from 'kraken-api';
+import {
     path,
     pathOr,
     applySpec,
     propOr,
     min,
-} = require('ramda');
+} from 'ramda';
 
-const floor = require('./floor');
-const { AboveMaximumPriceError, BelowMinimumAmountError } = require('./errors');
+import floor from './floor';
+import { AboveMaximumPriceError, BelowMinimumAmountError } from './errors';
 
 const FIAT_SYMBOL = 'ZEUR';
 const CRYPTO_SYMBOL = 'XXBT';
@@ -72,4 +72,4 @@ const buy = (credentials, options) => {
         });
 };
 
-module.exports = buy;
+export default buy;

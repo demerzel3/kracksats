@@ -1,12 +1,8 @@
-const {
-    SecretsManager,
-    SQS,
-    SNS,
-} = require('aws-sdk')
+import aws from 'aws-sdk';
 
-const handleError = require('./lib/handleError');
-const { OrderPendingError } = require('./lib/errors');
-const checkOrderStatus = require('./lib/checkOrderStatus');
+import handleError from './lib/handleError';
+import { OrderPendingError } from './lib/errors';
+import checkOrderStatus from './lib/checkOrderStatus';
 
 const {
     KRAKEN_CREDENTIALS_ARN,
@@ -49,9 +45,9 @@ const publishOrderCompletedEvent = (sns, order) => sns.publish({
 }).promise();
 
 exports.handler = (event, context) => {
-    const secretsManager = new SecretsManager();
-    const sqs = new SQS();
-    const sns = new SNS();
+    const secretsManager = new aws.SecretsManager();
+    const sqs = new aws.SQS();
+    const sns = new aws.SNS();
 
     return secretsManager.getSecretValue({ SecretId: KRAKEN_CREDENTIALS_ARN }).promise()
         .then(result => JSON.parse(result.SecretString))

@@ -1,16 +1,13 @@
-const {
-    SES,
-    SecretsManager,
-} = require('aws-sdk');
-const KrakenClient = require('kraken-api');
-const {
+import aws from 'aws-sdk';
+import KrakenClient from 'kraken-api';
+import {
     applySpec,
     prop,
     propOr,
     compose,
-} = require('ramda');
+} from 'ramda';
 
-const numberToString = require('./lib/numberToString');
+import numberToString from './lib/numberToString';
 
 const CRYPTO_SYMBOL = 'XXBT';
 
@@ -20,10 +17,10 @@ const {
     KRAKEN_CREDENTIALS_ARN,
 } = process.env;
 
-const ses = new SES();
+const ses = new aws.SES();
 
 const readSecretJson = arn =>
-    (new SecretsManager()).getSecretValue({ SecretId: arn }).promise()
+    (new aws.SecretsManager()).getSecretValue({ SecretId: arn }).promise()
         .then(result => JSON.parse(result.SecretString));
 
 const fetchWithdrawInfo = client =>

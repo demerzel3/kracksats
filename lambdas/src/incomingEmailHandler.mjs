@@ -1,14 +1,11 @@
-const {
-    S3,
-    SES,
-} = require('aws-sdk');
+import aws from 'aws-sdk';
+import mailparser from 'mailparser';
 
-const simpleParser = require('mailparser').simpleParser;
+import buildEmailResponse from './lib/buildEmailResponse';
 
-const buildEmailResponse = require('./lib/buildEmailResponse');
-
-const s3 = new S3();
-const ses = new SES();
+const { simpleParser } = mailparser;
+const s3 = new aws.S3();
+const ses = new aws.SES();
 
 exports.handler = (event, context) => {
     const {

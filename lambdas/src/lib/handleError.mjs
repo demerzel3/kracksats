@@ -1,4 +1,4 @@
-const handleError = (errorClass, valueOrFunc) => {
+export default (errorClass, valueOrFunc) => {
     return (error) => {
         if (error instanceof errorClass) {
             if (typeof valueOrFunc === 'function') {
@@ -11,5 +11,3 @@ const handleError = (errorClass, valueOrFunc) => {
         }
     };
 };
-
-module.exports = handleError;

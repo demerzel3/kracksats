@@ -1,4 +1,4 @@
-const {
+import {
     compose,
     map,
     split,
@@ -7,8 +7,8 @@ const {
     startsWith,
     when,
     complement,
-} = require('ramda');
-const MailComposer = require('nodemailer/lib/mail-composer');
+} from 'ramda';
+import MailComposer from 'nodemailer/lib/mail-composer';
 
 const quoteText = compose(
     join('\n'),
@@ -42,4 +42,4 @@ const buildEmailResponse = (mailObject, from, response) => {
     }));
 };
 
-module.exports = buildEmailResponse;
+export default buildEmailResponse;
