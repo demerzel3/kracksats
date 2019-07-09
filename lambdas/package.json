@@ -20,5 +20,8 @@
       "node": true,
       "es6": true
     }
+  },
+  "scripts": {
+    "webpack": "webpack"
   }
 }
