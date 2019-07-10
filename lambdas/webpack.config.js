@@ -1,5 +1,4 @@
 const path = require('path');
-const PnpWebpackPlugin = require('pnp-webpack-plugin');
 
 module.exports = {
     mode: 'production',
@@ -15,16 +14,6 @@ module.exports = {
         filename: '[name]/index.js',
         library: '',
         libraryTarget: 'commonjs',
-    },
-    resolve: {
-        plugins: [
-            PnpWebpackPlugin,
-        ],
-    },
-    resolveLoader: {
-        plugins: [
-            PnpWebpackPlugin.moduleLoader(module),
-        ],
     },
     externals: [
         (context, request, callback) => {
