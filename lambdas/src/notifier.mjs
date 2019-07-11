@@ -8,6 +8,7 @@ import {
 } from 'ramda';
 
 import numberToString from './lib/numberToString';
+import readSecretJson from './lib/readSecretJson';
 
 const CRYPTO_SYMBOL = 'XXBT';
 
@@ -18,10 +19,6 @@ const {
 } = process.env;
 
 const ses = new aws.SES();
-
-const readSecretJson = arn =>
-    (new aws.SecretsManager()).getSecretValue({ SecretId: arn }).promise()
-        .then(result => JSON.parse(result.SecretString));
 
 const fetchWithdrawInfo = client =>
     client.api('WithdrawInfo', {
