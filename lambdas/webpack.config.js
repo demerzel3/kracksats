@@ -8,6 +8,7 @@ module.exports = {
         notifier: './src/notifier.mjs',
         orderPoller: './src/orderPoller.mjs',
         incomingEmailHandler: './src/incomingEmailHandler.mjs',
+        withdrawalChecker: './src/withdrawalChecker.mjs',
     },
     output: {
         path: path.resolve(__dirname, 'dist'),

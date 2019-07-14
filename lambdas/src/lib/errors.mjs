@@ -18,8 +18,15 @@ class OrderPendingError extends Error {
     }
 }
 
+class WithdrawalNotFoundError extends Error {
+    constructor(withdrawalId, asset) {
+        super(`The withdrawal ${withdrawalId} (asset ${asset}) couldn't be found`);
+    }
+}
+
 export {
     AboveMaximumPriceError,
     BelowMinimumAmountError,
     OrderPendingError,
+    WithdrawalNotFoundError,
 };
