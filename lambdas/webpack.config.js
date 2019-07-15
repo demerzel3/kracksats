@@ -10,6 +10,7 @@ module.exports = {
         incomingEmailHandler: './src/incomingEmailHandler.mjs',
         withdrawalChecker: './src/withdrawalChecker.mjs',
         withdrawalTransitionHandler: './src/withdrawalTransitionHandler.mjs',
+        withdrawalPendingEmitter: './src/withdrawalPendingEmitter.mjs',
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
