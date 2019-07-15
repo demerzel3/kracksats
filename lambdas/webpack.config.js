@@ -9,6 +9,7 @@ module.exports = {
         orderPoller: './src/orderPoller.mjs',
         incomingEmailHandler: './src/incomingEmailHandler.mjs',
         withdrawalChecker: './src/withdrawalChecker.mjs',
+        withdrawalTransitionHandler: './src/withdrawalTransitionHandler.mjs',
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
