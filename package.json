@@ -12,22 +12,22 @@
   "devDependencies": {
     "@types/node": "8.10.45",
     "typescript": "^3.3.3333",
-    "aws-cdk": "^0.37.0"
+    "aws-cdk": "^1.0.0"
   },
   "dependencies": {
-    "@aws-cdk/aws-events": "^0.37.0",
-    "@aws-cdk/aws-events-targets": "^0.37.0",
-    "@aws-cdk/aws-iam": "^0.37.0",
-    "@aws-cdk/aws-lambda": "^0.37.0",
-    "@aws-cdk/aws-lambda-event-sources": "^0.37.0",
-    "@aws-cdk/aws-s3": "^0.37.0",
-    "@aws-cdk/aws-s3-notifications": "^0.37.0",
-    "@aws-cdk/aws-secretsmanager": "^0.37.0",
-    "@aws-cdk/aws-ses": "^0.37.0",
-    "@aws-cdk/aws-sns": "^0.37.0",
-    "@aws-cdk/aws-sns-subscriptions": "^0.37.0",
-    "@aws-cdk/aws-sqs": "^0.37.0",
-    "@aws-cdk/core": "^0.37.0",
+    "@aws-cdk/aws-events": "^1.0.0",
+    "@aws-cdk/aws-events-targets": "^1.0.0",
+    "@aws-cdk/aws-iam": "^1.0.0",
+    "@aws-cdk/aws-lambda": "^1.0.0",
+    "@aws-cdk/aws-lambda-event-sources": "^1.0.0",
+    "@aws-cdk/aws-s3": "^1.0.0",
+    "@aws-cdk/aws-s3-notifications": "^1.0.0",
+    "@aws-cdk/aws-secretsmanager": "^1.0.0",
+    "@aws-cdk/aws-ses": "^1.0.0",
+    "@aws-cdk/aws-sns": "^1.0.0",
+    "@aws-cdk/aws-sns-subscriptions": "^1.0.0",
+    "@aws-cdk/aws-sqs": "^1.0.0",
+    "@aws-cdk/core": "^1.0.0",
     "source-map-support": "^0.5.9"
   },
   "eslintConfig": {
