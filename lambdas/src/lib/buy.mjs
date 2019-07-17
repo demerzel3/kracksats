@@ -5,6 +5,7 @@ import {
     applySpec,
     propOr,
     min,
+    head,
 } from 'ramda';
 
 import floor from './floor';
@@ -35,7 +36,7 @@ const placeOrder = (client, price, orderAmount) => {
 
     return client.api('AddOrder', order)
         .then(path(['result', 'txid']))
-        .then(txid => ({ txid, ...order }));
+        .then(txids => ({ txid: head(txids), txids: txids, ...order }));
 };
 
 const computeOrderAmount = (initialBalance, bidPrice) =>
