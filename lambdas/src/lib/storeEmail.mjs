@@ -27,8 +27,8 @@ const enrichAwsMessageId = when(
 export default (tableName, emailDetails) => {
     const dynamodb = new aws.DynamoDB();
     const attributes = compose(
-        over(lensProp('messageId'), enrichAwsMessageId),
         map(objOf('S')),
+        over(lensProp('messageId'), enrichAwsMessageId),
         reject(either(isNil, isEmpty)),
         pick([
             'messageId',

@@ -17,8 +17,6 @@ const quoteText = compose(
 );
 
 const buildEmailResponse = (mailObject, from, response) => {
-    console.log(mailObject.subject);
-
     const { text, html } = response;
     const composer = new MailComposer({
         from,

@@ -2329,6 +2329,11 @@ pkg-dir@^3.0.0:
   dependencies:
     find-up "^3.0.0"
 
+planer@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/planer/-/planer-1.1.1.tgz#8b0e935cd11b0ff10aaec8d91f0825e2d52c07f2"
+  integrity sha1-iw6TXNEbD/EKrsjZHwgl4tUsB/I=
+
 posix-character-classes@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/posix-character-classes/-/posix-character-classes-0.1.1.tgz#01eac0fe3b5af71a2a6c02feabb8c1fef7e00eab"
