@@ -15,6 +15,7 @@ import {
 import numberToString from './lib/numberToString';
 import readSecretJson from './lib/readSecretJson';
 import unwrapSnsEvent from './lib/unwrapSnsEvent';
+import storeEmail from './lib/storeEmail';
 
 const CRYPTO_SYMBOL = 'XXBT';
 
@@ -22,6 +23,7 @@ const {
     RECIPIENT,
     WITHDRAWAL_KEY,
     KRAKEN_CREDENTIALS_ARN,
+    EMAILS_TABLE_NAME,
 } = process.env;
 
 const ses = new aws.SES();
@@ -51,6 +53,7 @@ const sendOrderCompletedEmail = ({
     })
     .then(({ limit: totalAmount, fee: withdrawFee }) => {
         const feePercent = ((withdrawFee / totalAmount) * 100).toFixed(2);
+        const subject = 'Order completed';
         const body =
 `Hi!
 
@@ -67,7 +70,7 @@ Respond with "Withdraw" to this message if you want to proceed.
             Message: {
                 Subject: {
                     Charset: 'UTF-8',
-                    Data: 'Order completed',
+                    Data: subject,
                 },
                 Body: {
                     Text: {
@@ -79,10 +82,16 @@ Respond with "Withdraw" to this message if you want to proceed.
             Source: 'Kracksats <kracksats@demerzel3.dev>',
         };
 
-        return ses.sendEmail(params).promise();
+        return ses.sendEmail(params).promise().then(({ MessageId }) => ({
+            messageId: MessageId,
+            to: RECIPIENT,
+            subject,
+            body,
+        }));
     });
 
 const sendWithdrawalInitiatedEmail = () => {
+    const subject = 'Withdrawal initiated';
     const body =
 `Hi!
 
@@ -96,7 +105,7 @@ The withdrawal you have request has started, I will ping you when it hits the bl
         Message: {
             Subject: {
                 Charset: 'UTF-8',
-                Data: 'Withdrawal initiated',
+                Data: subject,
             },
             Body: {
                 Text: {
@@ -108,7 +117,12 @@ The withdrawal you have request has started, I will ping you when it hits the bl
         Source: 'Kracksats <kracksats@demerzel3.dev>',
     };
 
-    return ses.sendEmail(params).promise();
+    return ses.sendEmail(params).promise().then(({ MessageId }) => ({
+        messageId: MessageId,
+        to: RECIPIENT,
+        subject,
+        body,
+    }));
 };
 
 const isOrderCompleted = propEq('type', 'orderCompleted');
@@ -125,5 +139,11 @@ exports.handler = (event, context) => {
         [T, ({ type }) => Promise.resolve(`Nothing to do here (event type: ${type})`)],
     ])(snsEvent)
 
-    return emailPromise.catch(e => console.error('Error sending notification mail', e));
+    return emailPromise
+        .then(emailDetails =>
+            storeEmail(EMAILS_TABLE_NAME, emailDetails)
+                .then(() => emailDetails)
+                .catch(e => console.error('Error storing notification email', emailDetails, e))
+        )
+        .catch(e => console.error('Error sending notification mail', e));
 };
