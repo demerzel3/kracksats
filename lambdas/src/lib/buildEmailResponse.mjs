@@ -41,12 +41,14 @@ const buildEmailResponse = (rawOrParsedEmail, from, response) => {
 
     return parsedEmailPromise.then((parsedEmail) => {
         const { text, html } = response;
+        const subject = when(complement(startsWith('Re:')), concat('Re: '), parsedEmail.subject);
+        const inReplyTo = parsedEmail.messageId;
 
         return composeEmail({
             from,
             to: parsedEmail.from.text,
-            subject: when(complement(startsWith('Re:')), concat('Re: '), parsedEmail.subject),
-            inReplyTo: parsedEmail.messageId,
+            subject,
+            inReplyTo,
             references: [
                 ...compose(
                     when(is(String), of),
@@ -56,7 +58,14 @@ const buildEmailResponse = (rawOrParsedEmail, from, response) => {
             ],
             text: `${text}\n\nYou wrote:\n${quoteText(parsedEmail.text)}`,
             html: `${html}<br><br>You wrote:<br><blockquote>${parsedEmail.html}</blockquote>`,
-        });
+        }).then(raw => ({
+            inReplyTo,
+            from,
+            to: parsedEmail.from.value[0].address,
+            subject,
+            body: text,
+            raw,
+        }));
     });
 };
 

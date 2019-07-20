@@ -1,7 +1,5 @@
 import aws from 'aws-sdk';
 import KrakenClient from 'kraken-api';
-import mailparser from 'mailparser';
-import planer from 'planer';
 import {
     allPass,
     applySpec,
@@ -21,8 +19,6 @@ import storeEmail from './lib/storeEmail';
 import getStoredEmail from './lib/getStoredEmail';
 import buildEmailResponse from './lib/buildEmailResponse';
 
-const { simpleParser } = mailparser;
-
 const CRYPTO_SYMBOL = 'XXBT';
 
 const {
@@ -34,39 +30,14 @@ const {
 
 const ses = new aws.SES();
 
-const sendRawEmail = rawEmail =>
+const sendRawEmail = emailDetails =>
     ses.sendRawEmail({
         RawMessage: {
-            Data: rawEmail,
+            Data: emailDetails.raw,
         },
     })
     .promise()
-    .then(({ MessageId }) => simpleParser(rawEmail).then(email => ({ ...email, messageId: MessageId })))
-    .then((parsedEmail) => {
-        const {
-            subject,
-            text,
-            inReplyTo,
-            messageId,
-            from: {
-                value: [{ address: from }],
-            },
-            to: {
-                value: [{ address: to }],
-            },
-        } = parsedEmail;
-        const body = planer.extractFromPlain(text);
-
-        return {
-            from,
-            to,
-            messageId,
-            inReplyTo,
-            subject,
-            body,
-            raw: rawEmail,
-        };
-    });
+    .then(({ MessageId }) => ({ ...emailDetails, messageId: MessageId }));
 
 const fetchWithdrawInfo = client =>
     client.api('WithdrawInfo', {

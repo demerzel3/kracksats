@@ -109,7 +109,7 @@ exports.handler = (event, context) => {
                         const reply = `Can't help you with that, please reply to one of my emails directly instead.`;
 
                         return buildEmailResponse(parsedEmail, 'kracksats@demerzel3.dev', { text: reply, html: reply })
-                            .then(rawResponseMessage =>
+                            .then(({ raw: rawResponseMessage }) =>
                                 ses.sendRawEmail({
                                     RawMessage: {
                                         Data: rawResponseMessage,
