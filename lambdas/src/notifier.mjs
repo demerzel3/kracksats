@@ -2,13 +2,9 @@ import aws from 'aws-sdk';
 import KrakenClient from 'kraken-api';
 import {
     allPass,
-    applySpec,
-    compose,
     cond,
     pathEq,
-    prop,
     propEq,
-    propOr,
     T,
 } from 'ramda';
 
@@ -18,6 +14,7 @@ import unwrapSnsEvent from './lib/unwrapSnsEvent';
 import storeEmail from './lib/storeEmail';
 import getStoredEmail from './lib/getStoredEmail';
 import buildEmailResponse from './lib/buildEmailResponse';
+import fetchWithdrawInfo from './lib/fetchWithdrawInfo';
 
 const CRYPTO_SYMBOL = 'XXBT';
 
@@ -39,18 +36,6 @@ const sendRawEmail = emailDetails =>
     .promise()
     .then(({ MessageId }) => ({ ...emailDetails, messageId: MessageId }));
 
-const fetchWithdrawInfo = client =>
-    client.api('WithdrawInfo', {
-        asset: CRYPTO_SYMBOL,
-        key: WITHDRAWAL_KEY,
-        amount: 1,
-    })
-    .then(prop('result'))
-    .then(applySpec({
-        fee: compose(parseFloat, propOr('0', 'fee')),
-        limit: compose(parseFloat, propOr('0', 'limit')),
-    }));
-
 const sendOrderCompletedEmail = ({
     order: {
         vol_exec: amount,
@@ -60,7 +45,7 @@ const sendOrderCompletedEmail = ({
     .then((credentials) => {
         const client = new KrakenClient(credentials.API_KEY, credentials.API_SECRET);
 
-        return fetchWithdrawInfo(client);
+        return fetchWithdrawInfo(client, { asset: CRYPTO_SYMBOL, key: WITHDRAWAL_KEY });
     })
     .then(({ limit: totalAmount, fee: withdrawFee }) => {
         const feePercent = ((withdrawFee / totalAmount) * 100).toFixed(2);
