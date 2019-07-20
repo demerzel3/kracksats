@@ -37,6 +37,8 @@ exports.handler = (event, context) => {
     const {
         withdrawal,
         withdrawalStatus,
+        sourceType,
+        sourceId,
     } = body;
     const { asset, refid: withdrawalId, txid: transactionId } = withdrawal;
 
@@ -53,6 +55,8 @@ exports.handler = (event, context) => {
                 },
                 prevWithdrawalStatus: 'pendingExchange',
                 withdrawalStatus: 'pendingChain',
+                sourceType,
+                sourceId,
             }))
             .catch(handleError(WithdrawalNotFoundError, e => console.error(e.message)));
     } else if (withdrawalStatus === 'pendingChain') {
@@ -66,6 +70,8 @@ exports.handler = (event, context) => {
                         transactionStatus,
                         prevWithdrawalStatus: 'pendingChain',
                         withdrawalStatus: 'confirmed',
+                        sourceType,
+                        sourceId,
                     });
                 }
             });

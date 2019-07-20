@@ -103,7 +103,7 @@ exports.handler = (event, context) => {
                         };
 
                         return storeEmail(EMAILS_TABLE_NAME, emailDetails)
-                            .then(() => publishEmailReceivedEvent(emailDetails));
+                            .then(() => publishEmailReceivedEvent({ email: emailDetails }));
                     } else {
                         // reply with an automatic message
                         const reply = `Can't help you with that, please reply to one of my emails directly instead.`;

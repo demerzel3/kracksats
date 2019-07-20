@@ -14,3 +14,9 @@ simpleParser(rawEmail)
             html: 'Your message has been received',
         }))
     .then(console.log);
+
+buildEmailResponse(rawEmail, 'kracksats@demerzel3.dev', {
+    text: 'Your message has been received',
+    html: 'Your message has been received',
+})
+    .then(console.log);

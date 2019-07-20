@@ -1,5 +1,7 @@
 import aws from 'aws-sdk';
 import KrakenClient from 'kraken-api';
+import mailparser from 'mailparser';
+import planer from 'planer';
 import {
     allPass,
     applySpec,
@@ -16,6 +18,10 @@ import numberToString from './lib/numberToString';
 import readSecretJson from './lib/readSecretJson';
 import unwrapSnsEvent from './lib/unwrapSnsEvent';
 import storeEmail from './lib/storeEmail';
+import getStoredEmail from './lib/getStoredEmail';
+import buildEmailResponse from './lib/buildEmailResponse';
+
+const { simpleParser } = mailparser;
 
 const CRYPTO_SYMBOL = 'XXBT';
 
@@ -27,6 +33,40 @@ const {
 } = process.env;
 
 const ses = new aws.SES();
+
+const sendRawEmail = rawEmail =>
+    ses.sendRawEmail({
+        RawMessage: {
+            Data: rawEmail,
+        },
+    })
+    .promise()
+    .then(({ MessageId }) => simpleParser(rawEmail).then(email => ({ ...email, messageId: MessageId })))
+    .then((parsedEmail) => {
+        const {
+            subject,
+            text,
+            inReplyTo,
+            messageId,
+            from: {
+                value: [{ address: from }],
+            },
+            to: {
+                value: [{ address: to }],
+            },
+        } = parsedEmail;
+        const body = planer.extractFromPlain(text);
+
+        return {
+            from,
+            to,
+            messageId,
+            inReplyTo,
+            subject,
+            body,
+            raw: rawEmail,
+        };
+    });
 
 const fetchWithdrawInfo = client =>
     client.api('WithdrawInfo', {
@@ -90,39 +130,14 @@ Respond with "Withdraw" to this message if you want to proceed.
         }));
     });
 
-const sendWithdrawalInitiatedEmail = () => {
-    const subject = 'Withdrawal initiated';
-    const body =
-`Hi!
+const sendWithdrawalInitiatedEmail = ({ sourceId: sourceMessageId }) => {
+    return getStoredEmail(EMAILS_TABLE_NAME, sourceMessageId)
+        .then((userEmail) => {
+            const reply = 'The withdrawal you have request has started, I will ping you when it hits the blockchain.';
 
-The withdrawal you have request has started, I will ping you when it hits the blockchain.
-`;
-
-    const params = {
-        Destination: {
-            ToAddresses: [RECIPIENT],
-        },
-        Message: {
-            Subject: {
-                Charset: 'UTF-8',
-                Data: subject,
-            },
-            Body: {
-                Text: {
-                    Charset: 'UTF-8',
-                    Data: body,
-                },
-            },
-        },
-        Source: 'Kracksats <kracksats@demerzel3.dev>',
-    };
-
-    return ses.sendEmail(params).promise().then(({ MessageId }) => ({
-        messageId: MessageId,
-        to: RECIPIENT,
-        subject,
-        body,
-    }));
+            return buildEmailResponse(userEmail.raw, 'kracksats@demerzel3.dev', { text: reply, html: reply });
+        })
+        .then(sendRawEmail);
 };
 
 const isOrderCompleted = propEq('type', 'orderCompleted');
@@ -137,7 +152,7 @@ exports.handler = (event, context) => {
         [isOrderCompleted, ({ body }) => sendOrderCompletedEmail(body)],
         [isWithdrawalInitiated, ({ body }) => sendWithdrawalInitiatedEmail(body)],
         [T, ({ type }) => Promise.resolve(`Nothing to do here (event type: ${type})`)],
-    ])(snsEvent)
+    ])(snsEvent);
 
     return emailPromise
         .then(emailDetails =>

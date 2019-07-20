@@ -8,6 +8,7 @@ module.exports = {
         notifier: './src/notifier.mjs',
         orderPoller: './src/orderPoller.mjs',
         incomingEmailHandler: './src/incomingEmailHandler.mjs',
+        incomingEmailParser: './src/incomingEmailParser.mjs',
         withdrawalChecker: './src/withdrawalChecker.mjs',
         withdrawalTransitionHandler: './src/withdrawalTransitionHandler.mjs',
         withdrawalPendingEmitter: './src/withdrawalPendingEmitter.mjs',
