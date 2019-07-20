@@ -89,7 +89,29 @@ Respond with "Withdraw" to this message if you want to proceed.
 const sendWithdrawalInitiatedEmail = ({ sourceId: sourceMessageId }) => {
     return getStoredEmail(EMAILS_TABLE_NAME, sourceMessageId)
         .then((userEmail) => {
-            const reply = 'The withdrawal you have request has started, I will ping you when it hits the blockchain.';
+            const reply = 'The withdrawal has been requested, I will let you know as soon as I have a transaction id.';
+
+            return buildEmailResponse(userEmail.raw, 'kracksats@demerzel3.dev', { text: reply, html: reply });
+        })
+        .then(sendRawEmail);
+};
+
+const sendWithdrawalPendingChainEmail = ({ sourceId: sourceMessageId, withdrawal: { txid } }) => {
+    return getStoredEmail(EMAILS_TABLE_NAME, sourceMessageId)
+        .then((userEmail) => {
+            const url = `https://blockstream.info/tx/${txid}`;
+            const text = `The transaction id for your withdrawal is ${txid}.\nFollow confirmation here: ${url}`;
+            const html = `The transaction id for your withdrawal is <a href="${url}">${txid}</a>.`;
+
+            return buildEmailResponse(userEmail.raw, 'kracksats@demerzel3.dev', { text, html });
+        })
+        .then(sendRawEmail);
+};
+
+const sendWithdrawalConfirmedEmail = ({ sourceId: sourceMessageId }) => {
+    return getStoredEmail(EMAILS_TABLE_NAME, sourceMessageId)
+        .then((userEmail) => {
+            const reply = 'The withdrawal is now confirmed, enjoy your sats!';
 
             return buildEmailResponse(userEmail.raw, 'kracksats@demerzel3.dev', { text: reply, html: reply });
         })
@@ -100,6 +122,14 @@ const isOrderCompleted = propEq('type', 'orderCompleted');
 const isWithdrawalInitiated = allPass([
     propEq('type', 'withdrawalTransition'),
     pathEq(['body', 'withdrawalStatus'], 'pendingExchange'),
+]);
+const isWithdrawalPendingChain = allPass([
+    propEq('type', 'withdrawalTransition'),
+    pathEq(['body', 'withdrawalStatus'], 'pendingChain'),
+]);
+const isWithdrawalConfirmed = allPass([
+    propEq('type', 'withdrawalTransition'),
+    pathEq(['body', 'withdrawalStatus'], 'confirmed'),
 ]);
 
 const store = emailDetails =>
@@ -112,6 +142,8 @@ exports.handler = (event, context) => {
     const emailPromise = cond([
         [isOrderCompleted, ({ body }) => sendOrderCompletedEmail(body).then(store)],
         [isWithdrawalInitiated, ({ body }) => sendWithdrawalInitiatedEmail(body).then(store)],
+        [isWithdrawalPendingChain, ({ body }) => sendWithdrawalPendingChainEmail(body).then(store)],
+        [isWithdrawalConfirmed, ({ body }) => sendWithdrawalConfirmedEmail(body).then(store)],
         [T, ({ type }) => Promise.resolve(`Nothing to do here (event type: ${type})`)],
     ])(snsEvent);
 
