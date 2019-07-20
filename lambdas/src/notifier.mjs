@@ -102,19 +102,19 @@ const isWithdrawalInitiated = allPass([
     pathEq(['body', 'withdrawalStatus'], 'pendingExchange'),
 ]);
 
+const store = emailDetails =>
+    storeEmail(EMAILS_TABLE_NAME, emailDetails)
+        .then(() => emailDetails)
+        .catch(e => console.error('Error storing notification email', emailDetails, e));
+
 exports.handler = (event, context) => {
     const snsEvent = unwrapSnsEvent(event);
     const emailPromise = cond([
-        [isOrderCompleted, ({ body }) => sendOrderCompletedEmail(body)],
-        [isWithdrawalInitiated, ({ body }) => sendWithdrawalInitiatedEmail(body)],
+        [isOrderCompleted, ({ body }) => sendOrderCompletedEmail(body).then(store)],
+        [isWithdrawalInitiated, ({ body }) => sendWithdrawalInitiatedEmail(body).then(store)],
         [T, ({ type }) => Promise.resolve(`Nothing to do here (event type: ${type})`)],
     ])(snsEvent);
 
     return emailPromise
-        .then(emailDetails =>
-            storeEmail(EMAILS_TABLE_NAME, emailDetails)
-                .then(() => emailDetails)
-                .catch(e => console.error('Error storing notification email', emailDetails, e))
-        )
         .catch(e => console.error('Error sending notification mail', e));
 };
