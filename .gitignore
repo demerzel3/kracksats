@@ -6,3 +6,6 @@ cdk.out
 
 # local configuration
 .env.local
+
+# rust
+target
