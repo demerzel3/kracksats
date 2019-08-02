@@ -24,9 +24,16 @@ class WithdrawalNotFoundError extends Error {
     }
 }
 
+class WithdrawalNoTransactionError extends Error {
+    constructor(withdrawalId, asset) {
+        super(`The withdrawal ${withdrawalId} (asset ${asset}) doesn't have a transaction id yet`);
+    }
+}
+
 export {
     AboveMaximumPriceError,
     BelowMinimumAmountError,
     OrderPendingError,
     WithdrawalNotFoundError,
+    WithdrawalNoTransactionError,
 };

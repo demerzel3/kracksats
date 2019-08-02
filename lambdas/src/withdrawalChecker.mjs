@@ -2,7 +2,7 @@ import aws from 'aws-sdk';
 import { tap } from 'ramda';
 
 import handleError from './lib/handleError';
-import { WithdrawalNotFoundError } from './lib/errors';
+import { WithdrawalNotFoundError, WithdrawalNoTransactionError } from './lib/errors';
 import fetchWithdrawalTransactionId from './lib/fetchWithdrawalTransactionId';
 import fetchTransactionStatus from './lib/fetchTransactionStatus';
 import unwrapSnsEvent from './lib/unwrapSnsEvent';
@@ -58,7 +58,8 @@ exports.handler = (event, context) => {
                 sourceType,
                 sourceId,
             }))
-            .catch(handleError(WithdrawalNotFoundError, e => console.error(e.message)));
+            .catch(handleError(WithdrawalNotFoundError, e => console.error(e.message)))
+            .catch(handleError(WithdrawalNoTransactionError, e => console.error(e.message)));
     } else if (withdrawalStatus === 'pendingChain') {
         return fetchTransactionStatus(transactionId)
             .then((transactionStatus) => {

@@ -8,7 +8,7 @@ import {
     when,
 } from 'ramda';
 
-import { WithdrawalNotFoundError } from './errors';
+import { WithdrawalNotFoundError, WithdrawalNoTransactionError } from './errors';
 
 export default (credentials, { withdrawalId, asset }) => {
     const client = new KrakenClient(credentials.API_KEY, credentials.API_SECRET);
@@ -19,5 +19,8 @@ export default (credentials, { withdrawalId, asset }) => {
             find(propEq('refid', withdrawalId)),
             prop('result'),
         ))
-        .then(prop('txid'));
+        .then(compose(
+            when(isNil, () => Promise.reject(new WithdrawalNoTransactionError(withdrawalId, asset))),
+            prop('txid'),
+        ));
 };
