@@ -1,12 +1,17 @@
 mod lib;
 
+#[macro_use]
+extern crate failure;
+
 use std::env;
-use std::error::Error;
+use std::error::Error as StdError;
 use std::str::FromStr;
+use std::fmt;
+use std::fmt::Display;
 
 use coinnect::kraken::{KrakenApi, KrakenCreds};
 use futures::future::Future;
-use lambda_runtime::{error::HandlerError, lambda, Context};
+use lambda_runtime::{error::HandlerError, lambda, Context as LambdaContext};
 use log::{self, error};
 use rusoto_core::Region;
 use rusoto_secretsmanager::{GetSecretValueRequest, SecretsManager, SecretsManagerClient};
@@ -15,6 +20,13 @@ use serde_json;
 use simple_error::bail;
 use simple_logger;
 use tokio_core::reactor::Core;
+use failure::{Error, ResultExt, SyncFailure};
+
+#[derive(Debug, Fail)]
+enum MyError {
+    #[fail(display = "Deserialization Error")]
+    DeserializationError,
+}
 
 #[derive(Deserialize)]
 struct CustomEvent {
@@ -71,17 +83,19 @@ struct KrakenTickerResult {
     // o = today's opening price
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<(), Box<dyn StdError>> {
     simple_logger::init_with_level(log::Level::Debug)?;
     lambda!(my_handler);
 
     Ok(())
 }
 
-fn get_account_balance(client: &mut KrakenApi) -> Result<KrakenBalanceResult, serde_json::Error> {
-    let response = client.get_account_balance().unwrap();
+fn get_account_balance(client: &mut KrakenApi) -> Result<KrakenBalanceResult, Error> {
+    let response = client.get_account_balance().map_err(SyncFailure::new)?;
+    let result = response.get("result").ok_or(format_err!("Unable to read result for get_account_balance"))?;
+    let parsed_result = serde_json::from_value(result.clone())?;
 
-    return serde_json::from_value(response.get("result").unwrap().clone());
+    Ok(parsed_result)
 }
 
 fn get_ticker(client: &mut KrakenApi, pair: &str) -> Result<KrakenTickerResult, serde_json::Error> {
@@ -107,7 +121,7 @@ fn get_ticker(client: &mut KrakenApi, pair: &str) -> Result<KrakenTickerResult, 
     })
 }
 
-fn my_handler(e: CustomEvent, c: Context) -> Result<CustomOutput, HandlerError> {
+fn my_handler(e: CustomEvent, c: LambdaContext) -> Result<CustomOutput, HandlerError> {
     if e.first_name == "" {
         error!("Empty first name in request {}", c.aws_request_id);
         bail!("Empty first name");
