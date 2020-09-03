@@ -16,7 +16,7 @@ const checkOrderStatus = (credentials, orderId) => {
 
     return fetchOrder(client, orderId)
         .then(tap(order => {
-            if (order.vol_exec !== order.vol) {
+            if ((order.status === 'pending' || order.status === 'open') && order.vol_exec !== order.vol) {
                 console.log('Order still pending', orderId, order);
                 throw new OrderPendingError(orderId);
             }
