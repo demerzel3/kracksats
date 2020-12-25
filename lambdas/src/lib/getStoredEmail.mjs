@@ -1,17 +1,15 @@
-import aws from 'aws-sdk';
-import {
-    map,
-    prop,
-} from 'ramda';
+import aws from 'aws-sdk'
+import { map, prop } from 'ramda'
 
-export default (tableName, messageId) => (new aws.DynamoDB())
+export default (tableName, messageId) =>
+  new aws.DynamoDB()
     .getItem({
-        TableName: tableName,
-        Key: {
-            messageId: {
-                S: messageId,
-            },
+      TableName: tableName,
+      Key: {
+        messageId: {
+          S: messageId,
         },
+      },
     })
     .promise()
-    .then(({ Item }) => map(prop('S'), Item));
+    .then(({ Item }) => map(prop('S'), Item))

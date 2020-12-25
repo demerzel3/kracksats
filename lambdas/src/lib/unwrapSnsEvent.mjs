@@ -1,21 +1,19 @@
 export default (event) => {
-    const {
-        Records: [
-            {
-                Sns: {
-                    Message,
-                    MessageAttributes: {
-                        type: {
-                            Value: messageType,
-                        },
-                    },
-                },
-            },
-        ],
-    } = event;
+  const {
+    Records: [
+      {
+        Sns: {
+          Message,
+          MessageAttributes: {
+            type: { Value: messageType },
+          },
+        },
+      },
+    ],
+  } = event
 
-    return {
-        type: messageType,
-        body: JSON.parse(Message),
-    };
-};
+  return {
+    type: messageType,
+    body: JSON.parse(Message),
+  }
+}
