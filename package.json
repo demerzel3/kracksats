@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "@types/node": "8.10.45",
+    "@types/ramda": "^0.27.34",
     "aws-cdk": "^1.80.0",
     "prettier": "^2.2.1",
     "ts-node": "^9.0.0",
@@ -76,7 +77,10 @@
     "@aws-cdk/custom-resources": "^1.80.0",
     "@aws-cdk/cx-api": "^1.80.0",
     "@aws-cdk/region-info": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "^4.11.0",
+    "@typescript-eslint/parser": "^4.11.0",
     "constructs": "^3.2.80",
+    "eslint": "^7.16.0",
     "source-map-support": "^0.5.19"
   },
   "eslintConfig": {

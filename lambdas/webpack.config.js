@@ -4,7 +4,7 @@ module.exports = {
   mode: 'production',
   target: 'node',
   entry: {
-    buyer: './src/buyer.js',
+    buyer: './src/buyer.ts',
     notifier: './src/notifier.js',
     orderPoller: './src/orderPoller.js',
     incomingEmailHandler: './src/incomingEmailHandler.js',
@@ -18,6 +18,12 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name]/index.js',
     libraryTarget: 'commonjs',
+  },
+  resolve: {
+    extensions: ['.ts', '.js'],
+  },
+  module: {
+    rules: [{ test: /\.ts$/, loader: 'ts-loader' }],
   },
   externals: [
     (context, request, callback) => {

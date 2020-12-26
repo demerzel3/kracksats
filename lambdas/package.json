@@ -24,5 +24,9 @@
   },
   "scripts": {
     "webpack": "webpack"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.68",
+    "ts-loader": "^8.0.12"
   }
 }

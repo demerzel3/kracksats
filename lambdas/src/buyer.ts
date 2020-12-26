@@ -3,10 +3,12 @@ import aws from 'aws-sdk'
 import buy from './lib/buy'
 import handleError from './lib/handleError'
 import { AboveMaximumPriceError, BelowMinimumAmountError } from './lib/errors'
+import { Order } from './shared/types'
+import readKrakenCredentials from './lib/readKrakenCredentials'
 
 const { EVENT_BUS_ARN } = process.env
 
-const publishOrderPlacedEvent = (sns, order) =>
+const publishOrderPlacedEvent = (sns: aws.SNS, order: Order) =>
   sns
     .publish({
       TopicArn: EVENT_BUS_ARN,
@@ -22,20 +24,16 @@ const publishOrderPlacedEvent = (sns, order) =>
     })
     .promise()
 
-export const handler = (event, context) => {
-  const { KRAKEN_CREDENTIALS_ARN, MAXIMUM_PRICE, MAXIMUM_AMOUNT } = process.env
+export const handler: AWSLambda.Handler = (event, context) => {
+  const { MAXIMUM_PRICE, MAXIMUM_AMOUNT } = process.env
 
-  const secretsManager = new aws.SecretsManager()
   const sns = new aws.SNS()
 
-  return secretsManager
-    .getSecretValue({ SecretId: KRAKEN_CREDENTIALS_ARN })
-    .promise()
-    .then((result) => JSON.parse(result.SecretString))
+  return readKrakenCredentials()
     .then((credentials) =>
       buy(credentials, {
-        maximumPrice: parseFloat(MAXIMUM_PRICE),
-        maximumAmount: parseFloat(MAXIMUM_AMOUNT),
+        maximumPrice: MAXIMUM_PRICE ? parseFloat(MAXIMUM_PRICE) : undefined,
+        maximumAmount: MAXIMUM_AMOUNT ? parseFloat(MAXIMUM_AMOUNT) : undefined,
       })
     )
     .then((order) => publishOrderPlacedEvent(sns, order))
