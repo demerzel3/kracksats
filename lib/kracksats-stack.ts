@@ -15,6 +15,8 @@ import * as dynamodb from '@aws-cdk/aws-dynamodb'
 
 const KRAKEN_CREDENTIALS_ARN =
   'arn:aws:secretsmanager:eu-west-1:932003549659:secret:prod/kraksats/credentials-A0C3o9'
+const ONESIGNAL_CREDENTIALS_ARN =
+  'arn:aws:secretsmanager:eu-west-1:932003549659:secret:prod/kracksats/onesignal-kvS3NQ'
 
 export class KracksatsStack extends cdk.Stack {
   /**
@@ -34,6 +36,11 @@ export class KracksatsStack extends cdk.Stack {
     const withdrawalKey = this.node.tryGetContext('withdrawalKey')
     if (!withdrawalKey) {
       throw new Error('Please specify a withdrawalKey.')
+    }
+
+    const mobilePlayerId = this.node.tryGetContext('mobilePlayerId')
+    if (!mobilePlayerId) {
+      throw new Error('Please specify a mobilePlayerId.')
     }
 
     const maximumPrice = this.node.tryGetContext('maximumPrice')
@@ -109,7 +116,9 @@ export class KracksatsStack extends cdk.Stack {
       handler: 'index.handler',
       environment: {
         KRAKEN_CREDENTIALS_ARN,
+        ONESIGNAL_CREDENTIALS_ARN,
         EVENT_BUS_ARN: eventsTopic.topicArn,
+        MOBILE_PLAYER_ID: mobilePlayerId,
         ...(maximumPrice ? { MAXIMUM_PRICE: maximumPrice } : {}),
         ...(maximumAmount ? { MAXIMUM_AMOUNT: maximumAmount } : {}),
       },
@@ -284,7 +293,12 @@ export class KracksatsStack extends cdk.Stack {
     getKrakenCredentialsPolicy.addResources(KRAKEN_CREDENTIALS_ARN)
     getKrakenCredentialsPolicy.addActions('secretsmanager:GetSecretValue')
 
+    const getOneSignalCredentialsPolicy = new iam.PolicyStatement()
+    getOneSignalCredentialsPolicy.addResources(ONESIGNAL_CREDENTIALS_ARN)
+    getOneSignalCredentialsPolicy.addActions('secretsmanager:GetSecretValue')
+
     buyer.addToRolePolicy(getKrakenCredentialsPolicy)
+    buyer.addToRolePolicy(getOneSignalCredentialsPolicy)
     notifier.addToRolePolicy(getKrakenCredentialsPolicy)
     orderPoller.addToRolePolicy(getKrakenCredentialsPolicy)
     withdrawer.addToRolePolicy(getKrakenCredentialsPolicy)

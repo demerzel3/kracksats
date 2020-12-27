@@ -8,6 +8,7 @@
     "kraken-api": "^1.0.1",
     "mailparser": "^3.0.1",
     "nodemailer": "^6.4.17",
+    "onesignal-node": "^3.2.0",
     "planer": "^1.1.1",
     "ramda": "^0.27.1",
     "webpack": "^5.11.0",

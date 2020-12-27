@@ -1,6 +1,11 @@
 import readSecretJson from './readSecretJson'
 
-type Credentials = { API_KEY: string; API_SECRET: string }
+type Credentials = {
+  API_KEY: string
+  API_SECRET: string
+  READONLY_API_KEY: string
+  READONLY_API_SECRET: string
+}
 
 const readKrakenCredentials: () => Promise<Credentials> = () => {
   const { KRAKEN_CREDENTIALS_ARN } = process.env

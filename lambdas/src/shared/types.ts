@@ -7,3 +7,7 @@ export type Order = {
   txid: string
   txids: string[]
 }
+
+export type BuyerEvent = {
+  otp?: string
+}

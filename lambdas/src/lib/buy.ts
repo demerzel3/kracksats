@@ -1,7 +1,11 @@
 import KrakenClient from 'kraken-api'
 
 import floor from './floor'
-import { AboveMaximumPriceError, BelowMinimumAmountError } from './errors'
+import {
+  AboveMaximumPriceError,
+  BelowMinimumAmountError,
+  OTPNeededError,
+} from './errors'
 import { Order } from '../shared/types'
 
 const MIN_ORDER_AMOUNT = 0.002
@@ -51,19 +55,24 @@ const buy: (
   credentials: {
     API_KEY: string
     API_SECRET: string
+    READONLY_API_KEY: string
+    READONLY_API_SECRET: string
   },
-  options?: { maximumPrice?: number; maximumAmount?: number }
+  options?: { otp?: string; maximumPrice?: number; maximumAmount?: number }
 ) => Promise<Order> = (credentials, options = {}) => {
-  const { maximumPrice, maximumAmount } = {
+  const { otp, maximumPrice, maximumAmount } = {
     ...options,
     maximumPrice: options.maximumPrice || Infinity,
     maximumAmount: options.maximumAmount || Infinity,
   }
-  const client = new KrakenClient(credentials.API_KEY, credentials.API_SECRET)
+  const readClient = new KrakenClient(
+    credentials.READONLY_API_KEY,
+    credentials.READONLY_API_SECRET
+  )
 
   return Promise.all([
-    fetchFiatBalance(client),
-    fetchCryptoBidPrice(client),
+    fetchFiatBalance(readClient),
+    fetchCryptoBidPrice(readClient),
   ]).then(([fiatBalance, cryptoBidPrice]) => {
     const orderAmount = computeOrderAmount(
       Math.min(fiatBalance, maximumAmount),
@@ -76,6 +85,7 @@ const buy: (
         fiatBalanceMinusFees: fiatBalance * (1 - ORDER_FEES),
         cryptoBidPrice,
         orderAmount,
+        otp,
       })
     )
 
@@ -83,7 +93,17 @@ const buy: (
       throw new AboveMaximumPriceError(maximumPrice, cryptoBidPrice)
     } else if (orderAmount < MIN_ORDER_AMOUNT) {
       throw new BelowMinimumAmountError(orderAmount)
+    } else if (!otp) {
+      throw new OTPNeededError(orderAmount, cryptoBidPrice)
     } else {
+      const client = new KrakenClient(
+        credentials.API_KEY,
+        credentials.API_SECRET,
+        {
+          otp,
+        }
+      )
+
       return placeOrder(client, cryptoBidPrice, orderAmount)
     }
   })
