@@ -39,7 +39,14 @@ declare module 'kraken-api' {
   }
 
   class KrakenClient {
-    constructor(key: string, secret: string)
+    constructor(
+      key: string,
+      secret: string,
+      options?: {
+        otp?: string
+        timeout?: number
+      }
+    )
 
     api(method: 'Balance'): Promise<BalanceResponse>
     api(method: 'Ticker', params: { pair: Pairs }): Promise<TickerResponse>

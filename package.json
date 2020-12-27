@@ -12,7 +12,8 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "build-lambdas": "yarn workspace lambdas build"
   },
   "devDependencies": {
     "@types/node": "8.10.45",

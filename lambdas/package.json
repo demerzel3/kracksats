@@ -1,5 +1,5 @@
 {
-  "name": "@kracksats/lambdas",
+  "name": "lambdas",
   "version": "1.0.0",
   "license": "MIT",
   "dependencies": {
@@ -23,7 +23,7 @@
     }
   },
   "scripts": {
-    "webpack": "webpack"
+    "build": "webpack --progress"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.68",
