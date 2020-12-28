@@ -4,6 +4,8 @@ module.exports = {
   mode: 'production',
   target: 'node',
   entry: {
+    proxyNewOrder: './src/proxyNewOrder.ts',
+
     buyer: './src/buyer.ts',
     notifier: './src/notifier.js',
     orderPoller: './src/orderPoller.js',

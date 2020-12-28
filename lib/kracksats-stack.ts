@@ -12,6 +12,7 @@ import * as sesActions from '@aws-cdk/aws-ses-actions'
 import * as s3 from '@aws-cdk/aws-s3'
 import * as s3Notifications from '@aws-cdk/aws-s3-notifications'
 import * as dynamodb from '@aws-cdk/aws-dynamodb'
+import * as apigateway from '@aws-cdk/aws-apigateway'
 
 const KRAKEN_CREDENTIALS_ARN =
   'arn:aws:secretsmanager:eu-west-1:932003549659:secret:prod/kraksats/credentials-A0C3o9'
@@ -124,6 +125,18 @@ export class KracksatsStack extends cdk.Stack {
       },
     })
     eventsTopic.grantPublish(buyer)
+
+    const proxyNewOrder = new lambda.Function(this, 'ProxyNewOrderLambda', {
+      runtime: lambda.Runtime.NODEJS_12_X,
+      logRetention: 14,
+      code: lambda.Code.fromAsset('lambdas/dist/proxyNewOrder'),
+      timeout: cdk.Duration.seconds(4),
+      handler: 'index.handler',
+      environment: {
+        BUYER_LAMBDA_ARN: buyer.functionArn,
+      },
+    })
+    buyer.grantInvoke(proxyNewOrder)
 
     const orderPoller = new lambda.Function(this, 'OrderPollerLambda', {
       runtime: lambda.Runtime.NODEJS_12_X,
@@ -356,6 +369,14 @@ export class KracksatsStack extends cdk.Stack {
         },
       ],
     })
+
+    const api = new apigateway.RestApi(this, 'orders-api', {
+      restApiName: 'Orders',
+      description: 'Provide routes to confirm/cancel/query orders.',
+    })
+
+    // POST /
+    api.root.addMethod('POST', new apigateway.LambdaIntegration(proxyNewOrder))
 
     // Run buyer every hour at minute 42.
     const buyerTicker = new events.Rule(this, 'BuyerTicker', {
