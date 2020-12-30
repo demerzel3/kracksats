@@ -6,7 +6,10 @@ import { OrderPendingError } from './errors'
 const fetchOrder = (client, orderId) =>
   client.api('QueryOrders', { txid: orderId }).then(path(['result', orderId]))
 const checkOrderStatus = (credentials, orderId) => {
-  const client = new KrakenClient(credentials.API_KEY, credentials.API_SECRET)
+  const client = new KrakenClient(
+    credentials.READONLY_API_KEY,
+    credentials.READONLY_API_SECRET
+  )
 
   return fetchOrder(client, orderId)
     .then(

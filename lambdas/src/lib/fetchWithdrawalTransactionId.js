@@ -4,7 +4,10 @@ import { compose, find, isNil, prop, propEq, when } from 'ramda'
 import { WithdrawalNotFoundError, WithdrawalNoTransactionError } from './errors'
 
 export default (credentials, { withdrawalId, asset }) => {
-  const client = new KrakenClient(credentials.API_KEY, credentials.API_SECRET)
+  const client = new KrakenClient(
+    credentials.READONLY_API_KEY,
+    credentials.READONLY_API_SECRET
+  )
 
   return client
     .api('WithdrawStatus', { asset })

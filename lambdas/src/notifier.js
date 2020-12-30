@@ -35,8 +35,8 @@ const sendOrderCompletedEmail = ({ order: { vol_exec: amount, price } }) =>
   readSecretJson(KRAKEN_CREDENTIALS_ARN)
     .then((credentials) => {
       const client = new KrakenClient(
-        credentials.API_KEY,
-        credentials.API_SECRET
+        credentials.READONLY_API_KEY,
+        credentials.READONLY_API_SECRET
       )
 
       return fetchWithdrawInfo(client, {
