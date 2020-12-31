@@ -12,8 +12,12 @@ import * as sesActions from '@aws-cdk/aws-ses-actions'
 import * as s3 from '@aws-cdk/aws-s3'
 import * as s3Notifications from '@aws-cdk/aws-s3-notifications'
 import * as dynamodb from '@aws-cdk/aws-dynamodb'
-import * as apigateway from '@aws-cdk/aws-apigateway'
+import * as apigateway from '@aws-cdk/aws-apigatewayv2'
+import * as apigatewayIntegrations from '@aws-cdk/aws-apigatewayv2-integrations'
+import * as certificatemanager from '@aws-cdk/aws-certificatemanager'
 
+const API_CERTIFICATE_ARN =
+  'arn:aws:acm:eu-west-1:932003549659:certificate/5b915351-ab8b-479c-b87e-b235cee6eec0'
 const KRAKEN_CREDENTIALS_ARN =
   'arn:aws:secretsmanager:eu-west-1:932003549659:secret:prod/kraksats/credentials-A0C3o9'
 const ONESIGNAL_CREDENTIALS_ARN =
@@ -137,6 +141,22 @@ export class KracksatsStack extends cdk.Stack {
       },
     })
     buyer.grantInvoke(proxyNewOrder)
+    const proxyGetOrders = new lambda.Function(this, 'ProxyGetOrders', {
+      runtime: lambda.Runtime.NODEJS_12_X,
+      logRetention: 14,
+      handler: 'index.handler',
+      code: new lambda.InlineCode(`
+        exports.handler = (event, context, callback) => {
+          return Promise.resolve({
+            statusCode: 200,
+            headers: {
+              'content-type': 'application/json',
+            },
+            body: JSON.stringify({ orders: [] })
+          });
+        };
+    `),
+    })
 
     const orderPoller = new lambda.Function(this, 'OrderPollerLambda', {
       runtime: lambda.Runtime.NODEJS_12_X,
@@ -370,13 +390,40 @@ export class KracksatsStack extends cdk.Stack {
       ],
     })
 
-    const api = new apigateway.RestApi(this, 'orders-api', {
-      restApiName: 'Orders',
-      description: 'Provide routes to confirm/cancel/query orders.',
+    const apiDomain = new apigateway.DomainName(this, 'api-domain-v2', {
+      domainName: 'kracksats-api.demerzel3.dev',
+      certificate: certificatemanager.Certificate.fromCertificateArn(
+        this,
+        'api-certificate',
+        API_CERTIFICATE_ARN
+      ),
     })
 
-    // POST /
-    api.root.addMethod('POST', new apigateway.LambdaIntegration(proxyNewOrder))
+    const ordersApi = new apigateway.HttpApi(this, 'orders-api-v2', {
+      apiName: 'Orders',
+      description: 'Provide routes to confirm/cancel/query orders.',
+      defaultDomainMapping: {
+        domainName: apiDomain,
+      },
+    })
+
+    // GET /orders
+    ordersApi.addRoutes({
+      integration: new apigatewayIntegrations.LambdaProxyIntegration({
+        handler: proxyGetOrders,
+      }),
+      path: '/orders',
+      methods: [apigateway.HttpMethod.GET],
+    })
+
+    // POST /orders
+    ordersApi.addRoutes({
+      integration: new apigatewayIntegrations.LambdaProxyIntegration({
+        handler: proxyNewOrder,
+      }),
+      path: '/orders',
+      methods: [apigateway.HttpMethod.POST],
+    })
 
     // Run buyer every hour at minute 42.
     const buyerTicker = new events.Rule(this, 'BuyerTicker', {
