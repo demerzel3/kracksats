@@ -130,33 +130,21 @@ export class KracksatsStack extends cdk.Stack {
     })
     eventsTopic.grantPublish(buyer)
 
-    const proxyNewOrder = new lambda.Function(this, 'ProxyNewOrderLambda', {
-      runtime: lambda.Runtime.NODEJS_12_X,
-      logRetention: 14,
-      code: lambda.Code.fromAsset('lambdas/dist/proxyNewOrder'),
-      timeout: cdk.Duration.seconds(4),
-      handler: 'index.handler',
-      environment: {
-        BUYER_LAMBDA_ARN: buyer.functionArn,
-      },
-    })
-    buyer.grantInvoke(proxyNewOrder)
-    const proxyGetOrders = new lambda.Function(this, 'ProxyGetOrders', {
-      runtime: lambda.Runtime.NODEJS_12_X,
-      logRetention: 14,
-      handler: 'index.handler',
-      code: new lambda.InlineCode(`
-        exports.handler = (event, context, callback) => {
-          return Promise.resolve({
-            statusCode: 200,
-            headers: {
-              'content-type': 'application/json',
-            },
-            body: JSON.stringify({ orders: [] })
-          });
-        };
-    `),
-    })
+    const ordersController = new lambda.Function(
+      this,
+      'OrdersControllerLambda',
+      {
+        runtime: lambda.Runtime.NODEJS_12_X,
+        logRetention: 14,
+        code: lambda.Code.fromAsset('lambdas/dist/ordersController'),
+        timeout: cdk.Duration.seconds(4),
+        handler: 'index.handler',
+        environment: {
+          BUYER_LAMBDA_ARN: buyer.functionArn,
+        },
+      }
+    )
+    buyer.grantInvoke(ordersController)
 
     const orderPoller = new lambda.Function(this, 'OrderPollerLambda', {
       runtime: lambda.Runtime.NODEJS_12_X,
@@ -407,22 +395,13 @@ export class KracksatsStack extends cdk.Stack {
       },
     })
 
-    // GET /orders
+    // /orders
     ordersApi.addRoutes({
       integration: new apigatewayIntegrations.LambdaProxyIntegration({
-        handler: proxyGetOrders,
+        handler: ordersController,
       }),
       path: '/orders',
-      methods: [apigateway.HttpMethod.GET],
-    })
-
-    // POST /orders
-    ordersApi.addRoutes({
-      integration: new apigatewayIntegrations.LambdaProxyIntegration({
-        handler: proxyNewOrder,
-      }),
-      path: '/orders',
-      methods: [apigateway.HttpMethod.POST],
+      methods: [apigateway.HttpMethod.ANY],
     })
 
     // Run buyer every hour at minute 42.
