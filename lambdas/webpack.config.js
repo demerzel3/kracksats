@@ -6,6 +6,7 @@ module.exports = {
   entry: {
     ordersController: './src/ordersController.ts',
 
+    buyReminder: './src/buyReminder.ts',
     buyer: './src/buyer.ts',
     notifier: './src/notifier.js',
     orderPoller: './src/orderPoller.js',

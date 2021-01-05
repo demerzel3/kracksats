@@ -113,6 +113,17 @@ export class KracksatsStack extends cdk.Stack {
       new lambdaEventSources.SnsEventSource(eventsTopic)
     )
 
+    const buyReminder = new lambda.Function(this, 'BuyReminderLambda', {
+      runtime: lambda.Runtime.NODEJS_12_X,
+      logRetention: 14,
+      code: lambda.Code.fromAsset('lambdas/dist/buyReminder'),
+      handler: 'index.handler',
+      environment: {
+        ONESIGNAL_CREDENTIALS_ARN,
+        MOBILE_PLAYER_ID: mobilePlayerId,
+      },
+    })
+
     const buyer = new lambda.Function(this, 'BuyerLambda', {
       runtime: lambda.Runtime.NODEJS_12_X,
       logRetention: 14,
@@ -121,9 +132,7 @@ export class KracksatsStack extends cdk.Stack {
       handler: 'index.handler',
       environment: {
         KRAKEN_CREDENTIALS_ARN,
-        ONESIGNAL_CREDENTIALS_ARN,
         EVENT_BUS_ARN: eventsTopic.topicArn,
-        MOBILE_PLAYER_ID: mobilePlayerId,
         ...(maximumPrice ? { MAXIMUM_PRICE: maximumPrice } : {}),
         ...(maximumAmount ? { MAXIMUM_AMOUNT: maximumAmount } : {}),
       },
@@ -318,8 +327,8 @@ export class KracksatsStack extends cdk.Stack {
     getOneSignalCredentialsPolicy.addResources(ONESIGNAL_CREDENTIALS_ARN)
     getOneSignalCredentialsPolicy.addActions('secretsmanager:GetSecretValue')
 
+    buyReminder.addToRolePolicy(getOneSignalCredentialsPolicy)
     buyer.addToRolePolicy(getKrakenCredentialsPolicy)
-    buyer.addToRolePolicy(getOneSignalCredentialsPolicy)
     notifier.addToRolePolicy(getKrakenCredentialsPolicy)
     orderPoller.addToRolePolicy(getKrakenCredentialsPolicy)
     withdrawer.addToRolePolicy(getKrakenCredentialsPolicy)
@@ -404,13 +413,15 @@ export class KracksatsStack extends cdk.Stack {
       methods: [apigateway.HttpMethod.ANY],
     })
 
-    // Run buyer every hour at minute 42.
-    const buyerTicker = new events.Rule(this, 'BuyerTicker', {
+    // Run buy reminder every monday at 7:30 am (Europe/Rome).
+    const buyReminderTicker = new events.Rule(this, 'BuyReminderTicker', {
       schedule: events.Schedule.cron({
-        minute: '42',
+        weekDay: 'MON',
+        hour: '6',
+        minute: '30',
       }),
     })
-    buyerTicker.addTarget(new targets.LambdaFunction(buyer))
+    buyReminderTicker.addTarget(new targets.LambdaFunction(buyReminder))
 
     // Run withdrawal pending emitter every 10 minutes.
     const withdrawalPendingTicker = new events.Rule(
