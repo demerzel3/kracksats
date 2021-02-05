@@ -413,10 +413,10 @@ export class KracksatsStack extends cdk.Stack {
       methods: [apigateway.HttpMethod.ANY],
     })
 
-    // Run buy reminder every monday at 7:30 am (Europe/Rome).
+    // Run buy reminder every sunday at 7:30 am (Europe/Rome).
     const buyReminderTicker = new events.Rule(this, 'BuyReminderTicker', {
       schedule: events.Schedule.cron({
-        weekDay: 'MON',
+        weekDay: 'SUN',
         hour: '6',
         minute: '30',
       }),
